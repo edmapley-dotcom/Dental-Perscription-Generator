@@ -1,688 +1,534 @@
 /* =============================================
-   DENTAL LAB RX — script.js
+   DENTAL LAB RX — style.css
    ============================================= */
 
-// ══════════════════════════════════════════════
-// TOOTH DATA  (FDI two-digit notation)
-// Upper right → upper left, then lower left → lower right
-// ══════════════════════════════════════════════
-const UPPER_TEETH = [18,17,16,15,14,13,12,11, 21,22,23,24,25,26,27,28];
-const LOWER_TEETH = [48,47,46,45,44,43,42,41, 31,32,33,34,35,36,37,38];
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-// Simple tooth SVG path (stylised)
-function toothPath(upper) {
-  // upper teeth taper toward root upward, lower downward
-  return upper
-    ? "M5 22 C3 18 2 14 2 10 C2 5 4 2 9 2 C11 2 13 3 14 3 C15 3 17 2 19 2 C24 2 26 5 26 10 C26 14 25 18 23 22 Z"
-    : "M5 2 C3 6 2 10 2 14 C2 19 4 22 9 22 C11 22 13 21 14 21 C15 21 17 22 19 22 C24 22 26 19 26 14 C26 10 25 6 23 2 Z";
+:root {
+  --bg:         #f2f0eb;
+  --surface:    #ffffff;
+  --border:     #d8d4cb;
+  --border-med: #b8b4aa;
+  --text:       #1c1a17;
+  --muted:      #6e6a60;
+  --accent:     #1d4e6b;
+  --accent-lt:  #e7eff5;
+  --accent-mid: #2e6f96;
+  --danger:     #7a1f1f;
+  --danger-lt:  #fdf1f1;
+  --warn:       #7a5200;
+  --warn-lt:    #fdf5e6;
+  --green:      #1a5c35;
+  --green-lt:   #eaf5ef;
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans:  'Source Sans 3', system-ui, sans-serif;
+  --font-mono:  'DM Mono', 'Courier New', monospace;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
 }
 
-function makeSVGTooth(upper) {
-  return `<svg viewBox="0 0 28 24" xmlns="http://www.w3.org/2000/svg"><path d="${toothPath(upper)}"/></svg>`;
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 100vh;
 }
 
-// ══════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════
-const state = {
-  type: 'fixed',
-  toothStates: {},  // FDI number → 'abutment' | 'pontic' | 'missing'
-  history: JSON.parse(localStorage.getItem('labRxHistory') || '[]'),
-  lastData: null,
-};
-
-// ══════════════════════════════════════════════
-// DOM REFS
-// ══════════════════════════════════════════════
-const typeTabs      = document.querySelectorAll('.type-tab');
-const navBtns       = document.querySelectorAll('.nav-btn');
-const tabGenerate   = document.getElementById('tab-generate');
-const tabHistory    = document.getElementById('tab-history');
-const randomBtn     = document.getElementById('randomBtn');
-const generateBtn   = document.getElementById('generateBtn');
-const clearBtn      = document.getElementById('clearBtn');
-const printBtn      = document.getElementById('printBtn');
-const saveBtn       = document.getElementById('saveBtn');
-const previewActions= document.getElementById('previewActions');
-const previewPlaceholder = document.getElementById('previewPlaceholder');
-const rxOutput      = document.getElementById('rxOutput');
-const historyList   = document.getElementById('historyList');
-const toothModeSelect = document.getElementById('toothMode');
-const clearTeethBtn = document.getElementById('clearTeethBtn');
-const toothChartControl = document.getElementById('toothChartControl');
-
-// ══════════════════════════════════════════════
-// TOOTH CHART — CONTROLS SIDE
-// ══════════════════════════════════════════════
-function buildControlChart() {
-  toothChartControl.innerHTML = `
-    <div class="tcc-arch" id="ctrl-upper"></div>
-    <div style="height:8px"></div>
-    <div class="tcc-arch" id="ctrl-lower"></div>
-  `;
-  renderControlArch('ctrl-upper', UPPER_TEETH, true);
-  renderControlArch('ctrl-lower', LOWER_TEETH, false);
+/* ── Header ── */
+.site-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.header-inner {
+  max-width: 1380px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-tooth { width: 26px; height: 30px; flex-shrink: 0; }
+.logo-title { display: block; font-family: var(--font-serif); font-size: 18px; font-weight: 600; line-height: 1.1; }
+.logo-sub   { display: block; font-size: 10px; opacity: 0.6; letter-spacing: 0.07em; text-transform: uppercase; }
+.header-nav { display: flex; gap: 4px; }
+.nav-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 5px 16px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border-color: rgba(255,255,255,0.5);
 }
 
-function renderControlArch(containerId, teeth, upper) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-  teeth.forEach((fdi, i) => {
-    // midline divider after index 7
-    if (i === 8) {
-      const div = document.createElement('div');
-      div.className = 'tcc-divider';
-      container.appendChild(div);
-    }
-    const el = document.createElement('div');
-    el.className = 'tcc-tooth';
-    el.dataset.fdi = fdi;
-    const stateClass = state.toothStates[fdi] ? `state-${state.toothStates[fdi]}` : '';
-    if (stateClass) el.classList.add(stateClass);
-    el.innerHTML = `${makeSVGTooth(upper)}<span class="tnum">${fdi}</span>`;
-    el.addEventListener('click', () => cycleToothState(fdi, el));
-    container.appendChild(el);
-  });
+/* ── Layout ── */
+.main-layout {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.25rem;
+  align-items: start;
 }
 
-function cycleToothState(fdi, el) {
-  const mode = toothModeSelect.value;
-  if (state.toothStates[fdi] === mode) {
-    delete state.toothStates[fdi];
-    el.classList.remove('state-abutment','state-pontic','state-missing');
-  } else {
-    state.toothStates[fdi] = mode;
-    el.classList.remove('state-abutment','state-pontic','state-missing');
-    el.classList.add(`state-${mode}`);
-  }
+/* ── Panels ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.panel-controls { padding: 1.25rem; display: flex; flex-direction: column; gap: 0; }
+.panel-preview  { padding: 1.25rem; }
+.panel-history  { padding: 1.25rem; grid-column: 1 / -1; }
+
+.panel-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
 }
 
-// ══════════════════════════════════════════════
-// PRESCRIPTION TYPE SWITCHING
-// ══════════════════════════════════════════════
-function setType(type) {
-  state.type = type;
-  typeTabs.forEach(t => t.classList.toggle('active', t.dataset.type === type));
-  document.querySelectorAll('.work-fields').forEach(f => f.style.display = 'none');
-  document.getElementById(`fields-${type}`).style.display = 'block';
+/* ── Control sections ── */
+.ctrl-section {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.ctrl-section:last-of-type { border-bottom: none; }
+.ctrl-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
 }
 
-// ══════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════
-function g(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
+/* ── Type tabs ── */
+.type-tabs { display: flex; flex-direction: column; gap: 5px; }
+.type-tab {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.type-tab:hover { background: var(--accent-lt); color: var(--accent); border-color: #b0cce0; }
+.type-tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
-function escHtml(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
+/* ── Form controls ── */
+.ctrl-row { margin-bottom: 0.5rem; }
+.ctrl-row label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.ctrl-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 6px 9px;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-mid);
+  box-shadow: 0 0 0 3px rgba(30,78,107,0.1);
+  background: #fff;
+}
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236e6a60' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  padding-right: 26px;
 }
 
-function todayStr() {
-  return new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+/* ── Checkboxes ── */
+.checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+.check-label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text); cursor: pointer; }
+.check-label input { width: auto; accent-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.14s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-primary   { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: #163d55; }
+.btn-secondary { background: transparent; color: var(--muted); border-color: var(--border-med); }
+.btn-secondary:hover { background: var(--bg); color: var(--text); }
+.btn-rand {
+  width: 100%;
+  justify-content: center;
+  background: var(--warn-lt);
+  color: var(--warn);
+  border-color: #e0c87a;
+  font-size: 13px;
+}
+.btn-rand:hover { background: #faedc8; }
+.btn-ghost {
+  background: transparent;
+  border: 1px dashed var(--border-med);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.btn-ghost:hover { background: var(--bg); }
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 14px;
+  background: var(--accent-lt);
+  color: var(--accent);
+  border-color: #b8cfdf;
+}
+.btn-sm:hover { background: #d0e4f0; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 1rem; }
+
+/* ── Tooth chart (controls side) ── */
+.tooth-chart-control { margin: 6px 0; }
+.tcc-arch { display: flex; justify-content: center; gap: 2px; margin: 3px 0; }
+.tcc-tooth {
+  width: 22px;
+  height: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  gap: 1px;
+}
+.tcc-tooth svg { width: 18px; height: 22px; transition: transform 0.1s; }
+.tcc-tooth:hover svg { transform: scale(1.12); }
+.tcc-tooth .tnum {
+  font-size: 8px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  line-height: 1;
+  text-align: center;
+}
+.tcc-tooth svg path { fill: var(--bg); stroke: var(--border-med); stroke-width: 1.5; transition: all 0.12s; }
+.tcc-tooth.state-abutment svg path { fill: var(--accent); stroke: var(--accent); }
+.tcc-tooth.state-pontic svg path   { fill: var(--warn-lt); stroke: var(--warn); }
+.tcc-tooth.state-missing svg path  { fill: var(--danger-lt); stroke: var(--danger); stroke-dasharray: 3 1.5; }
+.tcc-divider { width: 2px; }
+
+.tooth-legend { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 5px; flex-wrap: wrap; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.legend-abutment { background: var(--accent); }
+.legend-pontic   { background: var(--warn-lt); border: 1.5px solid var(--warn); }
+.legend-missing  { background: var(--danger-lt); border: 1.5px solid var(--danger); }
+
+/* ── Preview ── */
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.preview-toolbar .panel-title { margin: 0; padding: 0; border: none; }
+.preview-actions { display: flex; gap: 8px; }
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 350px;
+  gap: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
+.placeholder-tooth { opacity: 0.12; color: var(--accent); }
+.placeholder-tooth svg { width: 70px; height: 82px; }
+.placeholder-tooth svg path { fill: currentColor; }
+
+/* ══════════════════════════════════════
+   PRESCRIPTION OUTPUT DOCUMENT
+══════════════════════════════════════ */
+.rx-doc {
+  font-family: var(--font-sans);
+  border: 1.5px solid var(--border-med);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  font-size: 13px;
 }
 
-function fmtDate(str) {
-  if (!str) return '—';
-  const d = new Date(str + 'T00:00:00');
-  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+/* Doc header */
+.rx-doc-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+.rx-doc-header .practice { font-family: var(--font-serif); font-size: 16px; font-weight: 600; }
+.rx-doc-header .clinician { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+.rx-doc-header .meta { text-align: right; font-size: 11px; opacity: 0.7; font-family: var(--font-mono); line-height: 1.7; }
+
+/* Type badge */
+.rx-type-badge {
+  padding: 5px 1.25rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.badge-fixed    { background: var(--accent-lt); color: var(--accent); border-bottom: 1px solid #c0d8ea; }
+.badge-removable{ background: var(--green-lt);  color: var(--green);  border-bottom: 1px solid #b0d8c0; }
+.badge-ortho    { background: var(--warn-lt);   color: var(--warn);   border-bottom: 1px solid #e0d090; }
+
+/* Patient / Lab row */
+.rx-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.rx-party {
+  padding: 0.7rem 1.25rem;
+}
+.rx-party:first-child { border-right: 1px solid var(--border); }
+.rx-party .party-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.rx-party .party-name { font-weight: 600; font-size: 13px; }
+.rx-party .party-sub  { font-size: 11px; color: var(--muted); }
+
+/* Doc body */
+.rx-doc-body { padding: 1rem 1.25rem; }
+
+/* Tooth chart in output */
+.rx-tooth-section { margin-bottom: 1rem; }
+.rx-tooth-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.rx-arch-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 6px 6px;
+}
+.rx-arch { display: flex; justify-content: center; gap: 2px; }
+.rx-arch-divider { height: 6px; border-top: 1px dashed var(--border-med); margin: 2px 8px; }
+.rx-tooth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.rx-tooth .tnum {
+  font-size: 7.5px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  text-align: center;
+  line-height: 1;
+}
+.rx-tooth svg { width: 20px; height: 26px; }
+.rx-tooth svg path { fill: #e8e5e0; stroke: #b8b4aa; stroke-width: 1.2; }
+.rx-tooth.st-abutment svg path { fill: var(--accent); stroke: var(--accent); }
+.rx-tooth.st-pontic svg path   { fill: #faeec8; stroke: var(--warn); }
+.rx-tooth.st-missing svg path  { fill: #fde8e8; stroke: var(--danger); stroke-dasharray: 2 1; }
+
+/* Work details */
+.rx-work-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.rx-work-item .wlabel {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.rx-work-item .wval {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
 }
 
-function genCaseRef() {
-  return 'LAB-' + Date.now().toString(36).toUpperCase().slice(-6);
+/* Shade block */
+.rx-shade-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 6px 12px;
+  margin-bottom: 0.75rem;
+}
+.rx-shade-block .shade-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.rx-shade-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-med);
+  background: #e8dcc8;
+}
+.rx-shade-code { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--accent); }
+
+/* Notes / instructions */
+.rx-notes-block {
+  border-left: 3px solid var(--accent-mid);
+  background: var(--accent-lt);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 0.6rem 0.9rem;
+  font-size: 12.5px;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+.rx-notes-block .notes-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 2px;
 }
 
-function shadeToColor(shade) {
-  const map = {
-    'A1':'#f5ead0','A2':'#f0e0b8','A3':'#e8d09e','A3.5':'#e0c48a','A4':'#d4b070',
-    'B1':'#f5e8c8','B2':'#eedfc0','B3':'#e5d0a4','B4':'#d8c090',
-    'C1':'#eedfb8','C2':'#e6d5a8','C3':'#dcc890','C4':'#cfc080',
-    'D2':'#e8d8a8','D3':'#dfd0a0','D4':'#d0c08a',
-  };
-  return map[shade] || '#e8dcc8';
+/* Enclosures */
+.rx-enclosures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 0.75rem;
+}
+.rx-enclosure-tag {
+  font-size: 11px;
+  background: var(--green-lt);
+  color: var(--green);
+  border: 1px solid #a8d4b8;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-weight: 500;
 }
 
-function getEnclosures() {
-  return Array.from(document.querySelectorAll('#enclosureGroup input:checked'))
-    .map(cb => cb.value);
+/* Footer */
+.rx-doc-footer {
+  border-top: 1px dashed var(--border-med);
+  padding: 0.7rem 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 1rem;
+  font-size: 11px;
+  color: var(--muted);
+}
+.rx-sig-block { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.rx-sig-line  { width: 150px; border-top: 1px solid var(--border-med); margin-bottom: 3px; }
+.rx-edu-notice { font-size: 10px; opacity: 0.7; max-width: 280px; }
+
+/* ── History ── */
+.history-list { display: grid; gap: 8px; }
+.history-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.7rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+.history-item:hover { background: var(--accent-lt); border-color: #b8d0e4; }
+.hi-title { font-weight: 600; font-family: var(--font-serif); font-size: 14px; }
+.hi-patient { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.hi-date { font-size: 11px; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; }
+.empty-state { color: var(--muted); text-align: center; padding: 2.5rem; font-size: 13px; }
+
+/* ── Print ── */
+@media print {
+  body { background: #fff; }
+  .site-header, .panel-controls, .panel-history,
+  .preview-toolbar, .form-actions { display: none !important; }
+  .main-layout { display: block; padding: 0; max-width: 100%; }
+  .panel-preview { box-shadow: none; border: none; padding: 0; }
+  .rx-doc { border: 1px solid #999; }
 }
 
-// ══════════════════════════════════════════════
-// TOOTH CHART SVG for OUTPUT
-// ══════════════════════════════════════════════
-function buildOutputToothChart() {
-  function archHtml(teeth, upper) {
-    return teeth.map((fdi, i) => {
-      const st = state.toothStates[fdi] || '';
-      const stClass = st ? `st-${st}` : '';
-      const sep = (i === 7) ? '<div style="width:6px;flex-shrink:0;"></div>' : '';
-      return `${sep}<div class="rx-tooth ${stClass}">
-        <svg viewBox="0 0 28 24" xmlns="http://www.w3.org/2000/svg"><path d="${toothPath(upper)}"/></svg>
-        <span class="tnum">${fdi}</span>
-      </div>`;
-    }).join('');
-  }
-  return `
-    <div class="rx-tooth-section">
-      <div class="rx-tooth-title">Teeth Involved (FDI notation)</div>
-      <div class="rx-arch-wrap">
-        <div class="rx-arch upper-arch">${archHtml(UPPER_TEETH, true)}</div>
-        <div class="rx-arch-divider"></div>
-        <div class="rx-arch lower-arch">${archHtml(LOWER_TEETH, false)}</div>
-      </div>
-      <div class="tooth-legend" style="margin-top:5px;">
-        <span class="legend-dot legend-abutment"></span> Abutment / Crown &nbsp;
-        <span class="legend-dot legend-pontic"></span> Pontic &nbsp;
-        <span class="legend-dot legend-missing"></span> Missing
-      </div>
-    </div>`;
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .main-layout { grid-template-columns: 1fr; padding: 1rem; }
+  .rx-work-grid { grid-template-columns: 1fr; }
+  .rx-parties { grid-template-columns: 1fr; }
+  .rx-party:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .ctrl-row.two-col { grid-template-columns: 1fr; }
+  .checkbox-group { grid-template-columns: 1fr; }
 }
-
-// ══════════════════════════════════════════════
-// BUILD WORK DETAILS HTML per type
-// ══════════════════════════════════════════════
-function buildWorkHtml(type) {
-  if (type === 'fixed') {
-    const shade = g('shadeBody');
-    const shadeColor = shade ? shadeToColor(shade) : null;
-    const shadeHtml = shade ? `
-      <div class="rx-shade-block">
-        <span class="shade-label">Shade</span>
-        <div class="rx-shade-swatch" style="background:${shadeColor};"></div>
-        <span class="rx-shade-code">${escHtml(shade)}</span>
-        ${g('shadeGingival') ? `<span style="font-size:11px;color:var(--muted);">gingival: ${escHtml(g('shadeGingival'))}</span>` : ''}
-      </div>` : '';
-    return `
-      <div class="rx-work-grid">
-        <div class="rx-work-item"><div class="wlabel">Restoration</div><div class="wval">${escHtml(g('fixedType')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Material</div><div class="wval">${escHtml(g('fixedMaterial')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Occlusal Scheme</div><div class="wval">${escHtml(g('occlusalScheme')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Margin Type</div><div class="wval">${escHtml(g('marginType')) || '—'}</div></div>
-        ${g('ponticDesign') ? `<div class="rx-work-item"><div class="wlabel">Pontic Design</div><div class="wval">${escHtml(g('ponticDesign'))}</div></div>` : ''}
-      </div>
-      ${shadeHtml}`;
-  }
-  if (type === 'removable') {
-    const shade = g('removableShade');
-    const shadeColor = shade ? shadeToColor(shade) : null;
-    const shadeHtml = shade ? `
-      <div class="rx-shade-block">
-        <span class="shade-label">Tooth Shade</span>
-        <div class="rx-shade-swatch" style="background:${shadeColor};"></div>
-        <span class="rx-shade-code">${escHtml(shade)}</span>
-        ${g('toothMould') ? `<span style="font-size:11px;color:var(--muted);">mould: ${escHtml(g('toothMould'))}</span>` : ''}
-      </div>` : '';
-    return `
-      <div class="rx-work-grid">
-        <div class="rx-work-item"><div class="wlabel">Appliance</div><div class="wval">${escHtml(g('removableType')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Gum Shade</div><div class="wval">${escHtml(g('gumShade')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Clasps / Retention</div><div class="wval">${escHtml(g('claspType')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Occlusion</div><div class="wval">${escHtml(g('removableOcclusion')) || '—'}</div></div>
-      </div>
-      ${shadeHtml}
-      ${g('removableNotes') ? `<div class="rx-notes-block"><div class="notes-label">Design Notes</div>${escHtml(g('removableNotes'))}</div>` : ''}`;
-  }
-  if (type === 'ortho') {
-    return `
-      <div class="rx-work-grid">
-        <div class="rx-work-item"><div class="wlabel">Appliance</div><div class="wval">${escHtml(g('orthoType')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Wire / Gauge</div><div class="wval">${escHtml(g('wireGauge')) || '—'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Screw</div><div class="wval">${escHtml(g('expansionScrew')) || 'None'}</div></div>
-        <div class="rx-work-item"><div class="wlabel">Acrylic Colour</div><div class="wval">${escHtml(g('acrylicColour')) || '—'}</div></div>
-        ${g('springDetail') ? `<div class="rx-work-item"><div class="wlabel">Spring / Component</div><div class="wval">${escHtml(g('springDetail'))}</div></div>` : ''}
-      </div>
-      ${g('orthoNotes') ? `<div class="rx-notes-block"><div class="notes-label">Design Notes</div>${escHtml(g('orthoNotes'))}</div>` : ''}`;
-  }
-  return '';
-}
-
-// ══════════════════════════════════════════════
-// RENDER PRESCRIPTION
-// ══════════════════════════════════════════════
-function renderPrescription(data) {
-  const typeLabelMap = { fixed: 'Fixed Prosthodontics', removable: 'Removable Prosthodontics', ortho: 'Orthodontics' };
-  const badgeClass   = { fixed: 'badge-fixed', removable: 'badge-removable', ortho: 'badge-ortho' };
-
-  const enclosuresHtml = data.enclosures && data.enclosures.length
-    ? `<div class="rx-notes-block" style="border-left-color:var(--green); background:var(--green-lt); color:var(--green);">
-         <div class="notes-label" style="opacity:0.65;">Enclosures</div>
-         <div class="rx-enclosures">${data.enclosures.map(e => `<span class="rx-enclosure-tag">${escHtml(e)}</span>`).join('')}</div>
-       </div>`
-    : '';
-
-  const labNotesHtml = data.labNotes
-    ? `<div class="rx-notes-block"><div class="notes-label">Additional Notes for Laboratory</div>${escHtml(data.labNotes)}</div>`
-    : '';
-
-  rxOutput.innerHTML = `
-    <div class="rx-doc">
-      <div class="rx-doc-header">
-        <div>
-          <div class="practice">${escHtml(data.practice || 'Dental Practice')}</div>
-          <div class="clinician">${escHtml(data.clinicianName || '—')}${data.gdcNumber ? ' &nbsp;·&nbsp; GDC ' + escHtml(data.gdcNumber) : ''}</div>
-        </div>
-        <div class="meta">
-          <div>${escHtml(data.date)}</div>
-          <div>${escHtml(data.caseRef)}</div>
-          <div>Due: ${escHtml(data.dueDate || '—')}</div>
-        </div>
-      </div>
-
-      <div class="rx-type-badge ${badgeClass[data.type] || 'badge-fixed'}">
-        ◆ &nbsp;${typeLabelMap[data.type] || data.type}
-      </div>
-
-      <div class="rx-parties">
-        <div class="rx-party">
-          <div class="party-label">Patient</div>
-          <div class="party-name">${escHtml(data.patientName || '—')}</div>
-          <div class="party-sub">DOB: ${escHtml(data.patientDOB)}&nbsp;&nbsp;|&nbsp;&nbsp;ID: ${escHtml(data.patientID || '—')}</div>
-        </div>
-        <div class="rx-party">
-          <div class="party-label">Laboratory</div>
-          <div class="party-name">${escHtml(data.labName || '—')}</div>
-          <div class="party-sub">Due: ${escHtml(data.dueDate || '—')}</div>
-        </div>
-      </div>
-
-      <div class="rx-doc-body">
-        ${buildOutputToothChart()}
-        ${data.workHtml}
-        ${labNotesHtml}
-        ${enclosuresHtml}
-      </div>
-
-      <div class="rx-doc-footer">
-        <div class="rx-edu-notice">Educational prescription — generated for dental technology student practice only. Not for clinical use.</div>
-        <div class="rx-sig-block">
-          <div class="rx-sig-line"></div>
-          <div style="font-size:11px;">Clinician Signature</div>
-          <div style="font-size:10px;opacity:0.6;">${escHtml(data.clinicianName || '')}</div>
-        </div>
-      </div>
-    </div>`;
-
-  previewPlaceholder.style.display = 'none';
-  rxOutput.style.display = 'block';
-  previewActions.style.display = 'flex';
-}
-
-// ══════════════════════════════════════════════
-// COLLECT FORM DATA
-// ══════════════════════════════════════════════
-function collectData() {
-  const caseRef = g('caseRef') || genCaseRef();
-  document.getElementById('caseRef').value = caseRef;
-  return {
-    type:          state.type,
-    caseRef,
-    date:          todayStr(),
-    patientName:   g('patientName'),
-    patientDOB:    fmtDate(g('patientDOB')),
-    patientID:     g('patientID'),
-    clinicianName: g('clinicianName'),
-    gdcNumber:     g('gdcNumber'),
-    practice:      g('practice'),
-    labName:       g('labName'),
-    dueDate:       fmtDate(g('dueDate')),
-    labNotes:      g('labNotes'),
-    enclosures:    getEnclosures(),
-    toothStates:   { ...state.toothStates },
-    workHtml:      buildWorkHtml(state.type),
-    // raw values for re-loading (best-effort)
-    _raw: {
-      fixedType: g('fixedType'), fixedMaterial: g('fixedMaterial'),
-      shadeBody: g('shadeBody'), shadeGingival: g('shadeGingival'),
-      occlusalScheme: g('occlusalScheme'), marginType: g('marginType'), ponticDesign: g('ponticDesign'),
-      removableType: g('removableType'), removableShade: g('removableShade'),
-      toothMould: g('toothMould'), gumShade: g('gumShade'),
-      claspType: g('claspType'), removableOcclusion: g('removableOcclusion'), removableNotes: g('removableNotes'),
-      orthoType: g('orthoType'), wireGauge: g('wireGauge'), springDetail: g('springDetail'),
-      expansionScrew: g('expansionScrew'), acrylicColour: g('acrylicColour'), orthoNotes: g('orthoNotes'),
-    }
-  };
-}
-
-// ══════════════════════════════════════════════
-// RANDOMISER
-// ══════════════════════════════════════════════
-const FIRST_NAMES = ['James','Sarah','Mohammed','Emily','Liam','Chloe','Oliver','Amara',
-  'Thomas','Priya','Noah','Sophie','Ethan','Fatima','Lucas','Isabella','Aiden','Charlotte'];
-const LAST_NAMES  = ['Smith','Patel','Johnson','Williams','Brown','Taylor','Davies','Wilson',
-  'Evans','Ahmed','Thomas','Roberts','Khan','Walker','White','Thompson','Harris','Clarke'];
-const PRACTICES   = ['City Dental Centre','University Dental Hospital','Riverside Dental',
-  'Greenpark Dental Practice','St. Anne\'s Dental','Northgate Dental','Orchard Dental Clinic'];
-const LABS        = ['Ace Dental Laboratory','Prestige Dental Lab','Crown & Bridge Ltd',
-  'Aesthetic Dental Lab','ProSmile Technicians','Pearce Dental Lab','Midland Dental Studio'];
-
-function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-function randomDOB() {
-  const year = randInt(1950, 2008);
-  const month = String(randInt(1,12)).padStart(2,'0');
-  const day = String(randInt(1,28)).padStart(2,'0');
-  return `${year}-${month}-${day}`;
-}
-
-function randomFutureDate(minDays=7, maxDays=28) {
-  const d = new Date();
-  d.setDate(d.getDate() + randInt(minDays, maxDays));
-  return d.toISOString().slice(0,10);
-}
-
-const SCENARIOS = [
-  // FIXED
-  {
-    type: 'fixed',
-    fixedType: 'Full coverage crown', fixedMaterial: 'Full zirconia',
-    shadeBody: 'A2', occlusalScheme: 'Conformative (copy existing occlusion)',
-    marginType: 'Chamfer', ponticDesign: '',
-    teeth: { 36: 'abutment' },
-    labNotes: 'Please provide a wax try-in before final firing.',
-    enclosures: ['Impressions (polyvinylsiloxane)', 'Bite registration', 'Shade tab photograph'],
-  },
-  {
-    type: 'fixed',
-    fixedType: 'Fixed-fixed bridge', fixedMaterial: 'Layered zirconia (zirconia + porcelain)',
-    shadeBody: 'A3', occlusalScheme: 'Conformative (copy existing occlusion)',
-    marginType: 'Shoulder', ponticDesign: 'Ovate',
-    teeth: { 14: 'abutment', 15: 'pontic', 16: 'abutment' },
-    labNotes: 'Ovate pontic — ensure tissue contact surface is polished. Photos of adjacent teeth enclosed.',
-    enclosures: ['Impressions (polyvinylsiloxane)', 'Bite registration', 'Photographs', 'Facebow record'],
-  },
-  {
-    type: 'fixed',
-    fixedType: 'Veneer', fixedMaterial: 'Lithium disilicate (e.max)',
-    shadeBody: 'B1', occlusalScheme: 'Conformative (copy existing occlusion)',
-    marginType: 'Feather edge', ponticDesign: '',
-    teeth: { 11: 'abutment', 12: 'abutment', 21: 'abutment', 22: 'abutment' },
-    labNotes: 'Minimal-prep veneers. Patient is a pianist — extremely conscious of appearance. High translucency incisal requested.',
-    enclosures: ['Impressions (polyvinylsiloxane)', 'Photographs', 'Study models'],
-  },
-  {
-    type: 'fixed',
-    fixedType: 'Maryland bridge', fixedMaterial: 'Lithium disilicate (e.max)',
-    shadeBody: 'A1', occlusalScheme: 'Group function', marginType: '',
-    ponticDesign: 'Modified ridge lap',
-    teeth: { 22: 'missing', 21: 'abutment', 23: 'abutment' },
-    labNotes: 'Single wing design — retainer on 23 only. Ensure adequate clearance on palatal surface.',
-    enclosures: ['Impressions (polyvinylsiloxane)', 'Bite registration', 'Study models'],
-  },
-  {
-    type: 'fixed',
-    fixedType: 'Implant crown', fixedMaterial: 'Full zirconia',
-    shadeBody: 'A3', occlusalScheme: 'Mutually protected / canine guidance',
-    marginType: 'Chamfer', ponticDesign: '',
-    teeth: { 46: 'abutment' },
-    labNotes: 'Screw-retained crown on Straumann BL RC implant. Platform: RC 4.8mm. Please include analogue with model.',
-    enclosures: ['Digital scan (STL)', 'Photographs'],
-  },
-  // REMOVABLE
-  {
-    type: 'removable',
-    removableType: 'Chrome cobalt partial denture',
-    removableShade: 'A2', toothMould: 'SR Phonares II 6',
-    gumShade: 'Medium pink', claspType: 'Circumferential (Akers) clasp',
-    removableOcclusion: 'Bilateral balanced occlusion',
-    removableNotes: 'Major connector: palatal plate. Mesh retention on 14, 24 for acrylic flange. Rest seats on 17, 27.',
-    teeth: { 15: 'missing', 16: 'missing', 25: 'missing', 26: 'missing' },
-    enclosures: ['Impressions (alginate)', 'Bite registration', 'Study models'],
-  },
-  {
-    type: 'removable',
-    removableType: 'Complete upper and lower dentures',
-    removableShade: 'A2', toothMould: 'SR Vivodent S PE 22',
-    gumShade: 'Light pink', claspType: '',
-    removableOcclusion: 'Bilateral balanced occlusion',
-    removableNotes: 'Patient is edentulous. Copy existing denture aesthetics — patient happy with appearance. Shortened dental arch posteriorly. Post dam required on upper.',
-    teeth: {},
-    enclosures: ['Impressions (alginate)', 'Bite registration', 'Facebow record', 'Existing prosthesis'],
-  },
-  {
-    type: 'removable',
-    removableType: 'Acrylic partial denture',
-    removableShade: 'B1', toothMould: 'SR Vivodent DCL 3',
-    gumShade: 'Stippled', claspType: 'Ball clasp',
-    removableOcclusion: 'Copy existing occlusion',
-    removableNotes: 'Immediate denture — tooth 44 to be extracted at fit appointment. Please score ridge on cast.',
-    teeth: { 44: 'missing', 45: 'missing' },
-    enclosures: ['Impressions (alginate)', 'Bite registration', 'Study models'],
-  },
-  // ORTHO
-  {
-    type: 'ortho',
-    orthoType: 'Upper removable appliance (URA)',
-    wireGauge: '0.7mm stainless steel',
-    springDetail: 'Z-spring on 12 (palatal root torque)',
-    expansionScrew: '',
-    acrylicColour: 'Pink',
-    orthoNotes: 'Adams clasps 16, 26. Southend clasp 11, 21. Trim acrylic to allow 12 to erupt labially.',
-    teeth: { 12: 'abutment', 16: 'abutment', 26: 'abutment' },
-    enclosures: ['Study models', 'Impressions (alginate)'],
-  },
-  {
-    type: 'ortho',
-    orthoType: 'Twin block appliance',
-    wireGauge: '0.7mm stainless steel',
-    springDetail: '',
-    expansionScrew: 'Midline expansion screw',
-    acrylicColour: 'Clear / transparent',
-    orthoNotes: 'Class II div 1 malocclusion. Overjet 9mm. Anterior bite plane on upper block. Advance lower block to edge-to-edge incisors.',
-    teeth: {},
-    enclosures: ['Study models', 'Impressions (alginate)', 'Bite registration'],
-  },
-  {
-    type: 'ortho',
-    orthoType: 'Hawley retainer — upper',
-    wireGauge: '0.7mm stainless steel labial bow',
-    springDetail: '',
-    expansionScrew: '',
-    acrylicColour: 'Blue',
-    orthoNotes: 'Post-fixed appliance retention. Adams clasps 16, 26. Labial bow 13–23. Do not add any springs.',
-    teeth: { 13:'abutment', 16:'abutment', 26:'abutment' },
-    enclosures: ['Study models', 'Impressions (alginate)'],
-  },
-  {
-    type: 'ortho',
-    orthoType: 'Vacuum-formed retainer (VFR) — upper',
-    wireGauge: '1mm Essix / Zendura material',
-    springDetail: '',
-    expansionScrew: '',
-    acrylicColour: 'Clear / transparent',
-    orthoNotes: 'Post-aligner retention. Full-arch coverage to second molars. Patient to wear nights only.',
-    teeth: {},
-    enclosures: ['Digital scan (STL)', 'Study models'],
-  },
-];
-
-function setVal(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.value = val || '';
-}
-
-function randomise() {
-  const scenario = rand(SCENARIOS);
-  const firstName = rand(FIRST_NAMES);
-  const lastName  = rand(LAST_NAMES);
-  const gdcNum    = randInt(100000, 299999);
-  const ptNum     = 'PT-' + String(randInt(10000, 99999));
-  const caseRef   = genCaseRef();
-
-  // Set type and show correct fields
-  setType(scenario.type);
-
-  // Patient
-  setVal('patientName', `${firstName} ${lastName}`);
-  setVal('patientDOB',  randomDOB());
-  setVal('patientID',   ptNum);
-
-  // Clinician
-  const cFirstName = rand(FIRST_NAMES);
-  const cLastName  = rand(LAST_NAMES);
-  setVal('clinicianName', `Dr ${cFirstName} ${cLastName}`);
-  setVal('gdcNumber',     'GDC-' + gdcNum);
-  setVal('practice',      rand(PRACTICES));
-  const today = new Date().toISOString().slice(0,10);
-  setVal('rxDate', today);
-
-  // Lab
-  setVal('labName', rand(LABS));
-  setVal('dueDate', randomFutureDate());
-  setVal('caseRef', caseRef);
-
-  // Work fields
-  if (scenario.type === 'fixed') {
-    setVal('fixedType',      scenario.fixedType);
-    setVal('fixedMaterial',  scenario.fixedMaterial);
-    setVal('shadeBody',      scenario.shadeBody);
-    setVal('shadeGingival',  scenario.shadeGingival || '');
-    setVal('occlusalScheme', scenario.occlusalScheme);
-    setVal('marginType',     scenario.marginType);
-    setVal('ponticDesign',   scenario.ponticDesign);
-  } else if (scenario.type === 'removable') {
-    setVal('removableType',      scenario.removableType);
-    setVal('removableShade',     scenario.removableShade);
-    setVal('toothMould',         scenario.toothMould);
-    setVal('gumShade',           scenario.gumShade);
-    setVal('claspType',          scenario.claspType);
-    setVal('removableOcclusion', scenario.removableOcclusion);
-    setVal('removableNotes',     scenario.removableNotes);
-  } else if (scenario.type === 'ortho') {
-    setVal('orthoType',       scenario.orthoType);
-    setVal('wireGauge',       scenario.wireGauge);
-    setVal('springDetail',    scenario.springDetail);
-    setVal('expansionScrew',  scenario.expansionScrew);
-    setVal('acrylicColour',   scenario.acrylicColour);
-    setVal('orthoNotes',      scenario.orthoNotes);
-  }
-
-  // Notes & enclosures
-  setVal('labNotes', scenario.labNotes || '');
-
-  document.querySelectorAll('#enclosureGroup input[type=checkbox]').forEach(cb => {
-    cb.checked = (scenario.enclosures || []).includes(cb.value);
-  });
-
-  // Tooth states
-  state.toothStates = { ...(scenario.teeth || {}) };
-  buildControlChart();
-
-  // Auto-generate
-  generatePrescription();
-}
-
-// ══════════════════════════════════════════════
-// GENERATE
-// ══════════════════════════════════════════════
-function generatePrescription() {
-  const data = collectData();
-  if (!data.patientName) {
-    alert('Please enter a patient name (or hit Randomise to generate a scenario).');
-    return;
-  }
-  state.lastData = data;
-  renderPrescription(data);
-}
-
-// ══════════════════════════════════════════════
-// HISTORY
-// ══════════════════════════════════════════════
-function saveToHistory(data) {
-  state.history.unshift(data);
-  if (state.history.length > 60) state.history.pop();
-  try { localStorage.setItem('labRxHistory', JSON.stringify(state.history)); } catch(e) {}
-  renderHistory();
-}
-
-function renderHistory() {
-  if (!state.history.length) {
-    historyList.innerHTML = '<p class="empty-state">No prescriptions saved yet.</p>';
-    return;
-  }
-  const typeLabel = { fixed:'Fixed', removable:'Removable', ortho:'Orthodontic' };
-  historyList.innerHTML = state.history.map((item, i) => `
-    <div class="history-item" data-index="${i}">
-      <div>
-        <div class="hi-title">${escHtml(typeLabel[item.type] || item.type)} — ${escHtml(item.patientName || '—')}</div>
-        <div class="hi-patient">${escHtml(item.practice || '')} · Ref: ${escHtml(item.caseRef)}</div>
-      </div>
-      <div class="hi-date">${escHtml(item.date)}</div>
-    </div>`).join('');
-
-  historyList.querySelectorAll('.history-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const item = state.history[parseInt(el.dataset.index, 10)];
-      state.toothStates = { ...(item.toothStates || {}) };
-      buildControlChart();
-      setType(item.type || 'fixed');
-      renderPrescription(item);
-      switchTab('generate');
-    });
-  });
-}
-
-// ══════════════════════════════════════════════
-// TAB SWITCHING
-// ══════════════════════════════════════════════
-function switchTab(tab) {
-  navBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  tabGenerate.style.display = tab === 'generate' ? '' : 'none';
-  tabHistory.style.display  = tab === 'history'  ? 'block' : 'none';
-}
-
-// ══════════════════════════════════════════════
-// EVENT LISTENERS
-// ══════════════════════════════════════════════
-typeTabs.forEach(t => t.addEventListener('click', () => setType(t.dataset.type)));
-
-navBtns.forEach(b => b.addEventListener('click', () => {
-  switchTab(b.dataset.tab);
-  if (b.dataset.tab === 'history') renderHistory();
-}));
-
-randomBtn.addEventListener('click', randomise);
-
-generateBtn.addEventListener('click', generatePrescription);
-
-clearBtn.addEventListener('click', () => {
-  if (!confirm('Clear all fields and start over?')) return;
-  document.getElementById('rxForm') && document.getElementById('rxForm').reset();
-  // reset all inputs manually (no form wrapper on aside)
-  document.querySelectorAll('.panel-controls input, .panel-controls select, .panel-controls textarea').forEach(el => {
-    if (el.type === 'checkbox') el.checked = false;
-    else el.value = '';
-  });
-  state.toothStates = {};
-  buildControlChart();
-  rxOutput.style.display = 'none';
-  previewPlaceholder.style.display = 'flex';
-  previewActions.style.display = 'none';
-  state.lastData = null;
-});
-
-printBtn.addEventListener('click', () => window.print());
-
-saveBtn.addEventListener('click', () => {
-  if (state.lastData) {
-    saveToHistory(state.lastData);
-    alert(`Saved: ${state.lastData.caseRef}`);
-  }
-});
-
-clearTeethBtn.addEventListener('click', () => {
-  state.toothStates = {};
-  buildControlChart();
-});
-
-// ══════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════
-buildControlChart();
-setType('fixed');
-renderHistory();
