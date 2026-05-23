@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dental Rx Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Lora:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">℞</span>
+        <div>
+          <span class="logo-title">DentalRx</span>
+          <span class="logo-sub">Prescription Practice Tool</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-tab="generate">Generate</button>
+        <button class="nav-btn" data-tab="history">History</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-layout">
+
+    <!-- LEFT: Form Panel -->
+    <section class="panel panel-form" id="tab-generate">
+      <h2 class="panel-title">New Prescription</h2>
+
+      <form id="rxForm" novalidate>
+
+        <!-- Patient Details -->
+        <fieldset class="form-section">
+          <legend>Patient Details</legend>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="patientName">Patient Name</label>
+              <input type="text" id="patientName" placeholder="Full name" />
+            </div>
+            <div class="form-group">
+              <label for="patientDOB">Date of Birth</label>
+              <input type="date" id="patientDOB" />
+            </div>
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="patientID">Patient ID</label>
+              <input type="text" id="patientID" placeholder="e.g. PT-00142" />
+            </div>
+            <div class="form-group">
+              <label for="allergyNote">Known Allergies</label>
+              <input type="text" id="allergyNote" placeholder="e.g. Penicillin, NKDA" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Prescriber Details -->
+        <fieldset class="form-section">
+          <legend>Prescriber</legend>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="prescriberName">Prescriber Name</label>
+              <input type="text" id="prescriberName" placeholder="Dr. Full Name" />
+            </div>
+            <div class="form-group">
+              <label for="prescriberReg">Registration No.</label>
+              <input type="text" id="prescriberReg" placeholder="e.g. GDC-123456" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="practice">Practice / Institution</label>
+              <input type="text" id="practice" placeholder="Clinic or university name" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Medication -->
+        <fieldset class="form-section">
+          <legend>Medication</legend>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="drugName">Drug Name</label>
+              <select id="drugName">
+                <option value="">— Select drug —</option>
+                <optgroup label="Antibiotics">
+                  <option>Amoxicillin</option>
+                  <option>Metronidazole</option>
+                  <option>Erythromycin</option>
+                  <option>Co-amoxiclav (Augmentin)</option>
+                  <option>Doxycycline</option>
+                  <option>Clindamycin</option>
+                </optgroup>
+                <optgroup label="Analgesics">
+                  <option>Ibuprofen</option>
+                  <option>Paracetamol</option>
+                  <option>Co-codamol</option>
+                  <option>Diclofenac</option>
+                </optgroup>
+                <optgroup label="Antifungals">
+                  <option>Nystatin</option>
+                  <option>Miconazole</option>
+                  <option>Fluconazole</option>
+                </optgroup>
+                <optgroup label="Mouthwashes / Topical">
+                  <option>Chlorhexidine 0.2%</option>
+                  <option>Benzydamine (Difflam)</option>
+                  <option>Corsodyl Gel</option>
+                </optgroup>
+                <optgroup label="Other">
+                  <option value="custom">Other (type below)</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="drugCustom">Custom Drug Name</label>
+              <input type="text" id="drugCustom" placeholder="If 'Other' selected" disabled />
+            </div>
+          </div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label for="strength">Strength</label>
+              <input type="text" id="strength" placeholder="e.g. 500mg" />
+            </div>
+            <div class="form-group">
+              <label for="form">Form</label>
+              <select id="form">
+                <option value="">— Form —</option>
+                <option>Tablet</option>
+                <option>Capsule</option>
+                <option>Oral Suspension</option>
+                <option>Mouthwash</option>
+                <option>Gel</option>
+                <option>Cream</option>
+                <option>Drops</option>
+                <option>Injection</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input type="text" id="quantity" placeholder="e.g. 21" />
+            </div>
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="dose">Dose</label>
+              <input type="text" id="dose" placeholder="e.g. One tablet" />
+            </div>
+            <div class="form-group">
+              <label for="frequency">Frequency</label>
+              <select id="frequency">
+                <option value="">— Frequency —</option>
+                <option>Once daily (OD)</option>
+                <option>Twice daily (BD)</option>
+                <option>Three times daily (TDS)</option>
+                <option>Four times daily (QDS)</option>
+                <option>Every 4–6 hours (PRN)</option>
+                <option>As required (PRN)</option>
+                <option>At night (Nocte)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label for="duration">Duration</label>
+              <input type="text" id="duration" placeholder="e.g. 5 days" />
+            </div>
+            <div class="form-group">
+              <label for="repeats">Repeats</label>
+              <select id="repeats">
+                <option value="0">No repeats</option>
+                <option value="1">1 repeat</option>
+                <option value="2">2 repeats</option>
+                <option value="3">3 repeats</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="instructions">Additional Instructions</label>
+              <textarea id="instructions" rows="2" placeholder="e.g. Take with food. Complete the full course."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Clinical Note -->
+        <fieldset class="form-section">
+          <legend>Clinical Note (optional)</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clinicalNote">Indication / Notes for Pharmacist</label>
+              <textarea id="clinicalNote" rows="2" placeholder="e.g. Post-extraction prophylaxis. Lower right 6 (46) extraction 12/05/2025."></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+          <button type="button" class="btn btn-primary" id="generateBtn">Generate Prescription →</button>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- RIGHT: Preview Panel -->
+    <section class="panel panel-preview">
+      <div class="preview-toolbar">
+        <h2 class="panel-title">Preview</h2>
+        <div class="preview-actions" id="previewActions" style="display:none;">
+          <button class="btn btn-sm" id="printBtn">Print</button>
+          <button class="btn btn-sm" id="saveBtn">Save to History</button>
+        </div>
+      </div>
+
+      <div class="preview-placeholder" id="previewPlaceholder">
+        <span class="placeholder-icon">℞</span>
+        <p>Fill in the form and click <strong>Generate Prescription</strong> to see the preview here.</p>
+      </div>
+
+      <div class="rx-card" id="rxCard" style="display:none;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- History Panel (hidden by default) -->
+    <section class="panel panel-history" id="tab-history" style="display:none;">
+      <h2 class="panel-title">Saved Prescriptions</h2>
+      <div id="historyList" class="history-list">
+        <p class="empty-state">No prescriptions saved yet.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
