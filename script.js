@@ -64,8 +64,7 @@ const tabGenerate        = document.getElementById('tab-generate');
 const tabHistory         = document.getElementById('tab-history');
 const generateBtn        = document.getElementById('generateBtn');
 const clearBtn           = document.getElementById('clearBtn');
-const printBtn           = document.getElementById('printBtn');
-const saveBtn            = document.getElementById('saveBtn');
+const pdfBtn           = document.getElementById('pdfBtn');
 const previewActions     = document.getElementById('previewActions');
 const previewPlaceholder = document.getElementById('previewPlaceholder');
 const rxOutput           = document.getElementById('rxOutput');
@@ -203,20 +202,22 @@ function buildArchSVG(toothStates) {
   // Canvas
   const W = 230, H = 310;
 
-  // We model each arch as a semi-ellipse.
-  // Upper arch centre: (115, 118); semi-axes rx=97, ry=72
-  // Teeth are placed from angle 200° to 340° (going through 270° = bottom of ellipse)
-  // — this means the arch opens downward (like an inverted U / upper jaw viewed from below)
+  // ── Upper arch ─────────────────────────────────────────────────────────────
+  // Sweep from 200°→340° passes through 270° (bottom of ellipse).
+  // This places teeth in a ∩ shape: arch opens downward, as the upper jaw
+  // is viewed from below (occlusal view, as printed on a lab prescription).
   const UCX=115, UCY=108, URX=96, URY=70;
-  const U_START=200, U_END=340; // degrees
+  const U_START=200, U_END=340;
 
-  // Lower arch centre: (115, 198); slightly smaller
+  // ── Lower arch ─────────────────────────────────────────────────────────────
+  // Sweep from 20°→160° passes through 90° (top of ellipse).
+  // This places teeth in a ∪ shape: arch opens upward, matching the mandible
+  // as viewed from above — correctly mirrored below the maxillary arch.
   const LCX=115, LCY=202, LRX=82, LRY=60;
-  const L_START=200, L_END=340; // same sweep, opens upward
+  const L_START=20, L_END=160;
 
   function deg2rad(d) { return d*Math.PI/180; }
 
-  // Place n points evenly along an arc from startDeg to endDeg
   function arcPoints(cx, cy, rx, ry, startDeg, endDeg, n) {
     return Array.from({length:n}, (_,i)=>{
       const t = deg2rad(startDeg + (endDeg-startDeg)*i/(n-1));
@@ -227,17 +228,15 @@ function buildArchSVG(toothStates) {
   const uPts = arcPoints(UCX,UCY,URX,URY,U_START,U_END,16);
   const lPts = arcPoints(LCX,LCY,LRX,LRY,L_START,L_END,16);
 
-  // Tooth dimensions on arch (smaller than control)
   function archToothDims(fdi) {
     const n=fdi%10;
     if(n===0||n>=7) return {w:13,h:14};
     if(n===6)       return {w:12,h:13};
     if(n===5||n===4)return {w:10,h:12};
     if(n===3)       return {w:9, h:13};
-    return {w:8,h:11}; // incisors
+    return {w:8,h:11};
   }
 
-  // Tooth fill/stroke based on state
   function toothStyle(fdi) {
     const s = toothStates[fdi];
     if(s==='abutment') return {fill:'#1a3a5c',stroke:'#0d2740',textFill:'#ffffff'};
@@ -246,49 +245,54 @@ function buildArchSVG(toothStates) {
     return {fill:'#f0ece5',stroke:'#a8a49c',textFill:'#6b6760'};
   }
 
-  function renderTooth(fdi, px, py, angle) {
+  // Render one tooth at (px,py) rotated by toothAngleDeg.
+  // The tooth rectangle rotates with the arch curve.
+  // The text is ALWAYS kept upright: we counter-rotate it by -toothAngleDeg
+  // so the FDI label is never upside-down regardless of arch position.
+  function renderTooth(fdi, px, py, toothAngleDeg) {
     const {w,h} = archToothDims(fdi);
     const {fill,stroke,textFill,dasharray} = toothStyle(fdi);
     const da = dasharray ? `stroke-dasharray="${dasharray}"` : '';
     const label = String(fdi);
     const fs = label.length>2 ? 4 : 5;
-    return `<g transform="translate(${px.toFixed(1)},${py.toFixed(1)}) rotate(${angle.toFixed(1)})">
+    // Normalise the counter-rotation so text reads left-to-right always
+    // (keep it in -180..180 range so SVG renders cleanly)
+    const textRotate = -toothAngleDeg;
+    return `<g transform="translate(${px.toFixed(1)},${py.toFixed(1)}) rotate(${toothAngleDeg.toFixed(1)})">
       <rect x="${(-w/2).toFixed(1)}" y="${(-h/2).toFixed(1)}" width="${w}" height="${h}"
         rx="2.5" ry="2" fill="${fill}" stroke="${stroke}" stroke-width="0.9" ${da}/>
       <text x="0" y="0.5" text-anchor="middle" dominant-baseline="central"
         font-size="${fs}" font-weight="700" fill="${textFill}"
-        font-family="DM Mono,Courier New,monospace">${label}</text>
+        font-family="DM Mono,Courier New,monospace"
+        transform="rotate(${textRotate.toFixed(1)})">${label}</text>
     </g>`;
   }
 
   let svg = '';
 
-  // Quadrant labels — positioned at corners
+  // Quadrant labels
   svg += `
-    <text x="16"  y="28"  font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">UR</text>
-    <text x="198" y="28"  font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">UL</text>
-    <text x="16"  y="296" font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">LR</text>
-    <text x="198" y="296" font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">LL</text>
+    <text x="16"  y="26"  font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">UR</text>
+    <text x="198" y="26"  font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">UL</text>
+    <text x="16"  y="300" font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">LR</text>
+    <text x="198" y="300" font-size="7" font-weight="700" fill="#8b1a2f" font-family="DM Mono,monospace">LL</text>
   `;
 
-  // Midline dashes
-  svg += `<line x1="${W/2}" y1="30" x2="${W/2}" y2="280"
+  // Midline
+  svg += `<line x1="${W/2}" y1="22" x2="${W/2}" y2="285"
     stroke="#d4d0c8" stroke-width="0.5" stroke-dasharray="3 2"/>`;
 
-  // Upper arch teeth
-  // angle: tooth long axis should be perpendicular to the arch tangent
-  // tangent angle at parameter t = atan2(ry*cos(t), -rx*sin(t)) + 90°
+  // Upper teeth — tangent angle + 90° orients the tooth perpendicular to the arch
   UPPER_TEETH.forEach((fdi,i)=>{
     const p = uPts[i];
-    // Tangent to ellipse at t: direction = (-rx*sin(t), ry*cos(t))
     const tx = -URX*Math.sin(p.t), ty = URY*Math.cos(p.t);
     const tangentDeg = Math.atan2(ty,tx)*180/Math.PI;
-    // Tooth points outward from centre (root away from arch centre)
     const angleDeg = tangentDeg + 90;
     svg += renderTooth(fdi, p.x, p.y, angleDeg);
   });
 
-  // Lower arch teeth
+  // Lower teeth — same tangent calculation; lower arch now sweeps through
+  // the top of the ellipse so roots point upward naturally
   LOWER_TEETH.forEach((fdi,i)=>{
     const p = lPts[i];
     const tx = -LRX*Math.sin(p.t), ty = LRY*Math.cos(p.t);
@@ -379,7 +383,6 @@ function buildWorkHtml(type) {
 // ══════════════════════════════════════════════
 function buildWorkflowStrip(checkedIds) {
   const checkedSet = new Set(checkedIds);
-  // Determine the "current" stage: the last checked one
   let lastCheckedIdx = -1;
   WORKFLOW_STAGES.forEach((s,i)=>{ if(checkedSet.has(s.id)) lastCheckedIdx=i; });
 
@@ -388,38 +391,26 @@ function buildWorkflowStrip(checkedIds) {
     if(checkedSet.has(s.id) && i===lastCheckedIdx) cls='wf-current';
     else if(checkedSet.has(s.id)) cls='wf-done';
     const arrow = i>0 ? '<span class="rx-wf-arrow">›</span>' : '';
-    return `${arrow}<div class="rx-wf-step ${cls}">
+    const whoBadge = `<span class="rx-wf-who ${s.who}">${s.who==='clinic'?'C':'L'}</span>`;
+    return `${arrow}<div class="rx-wf-step ${cls}" title="${s.desc}">
       <span class="wf-num">${s.step}</span>
+      ${whoBadge}
       <span>${s.label}</span>
     </div>`;
   }).join('');
 
   return `
     <div class="rx-workflow-strip">
-      <div class="rx-workflow-title">Manufacturing Workflow — completed stages shown in gold · current stage shown in maroon</div>
+      <div class="rx-workflow-title">
+        Manufacturing Workflow &nbsp;·&nbsp;
+        <span style="color:rgba(255,255,255,0.55)">C = Clinic &nbsp; L = Laboratory</span>
+        &nbsp;·&nbsp; Gold = completed &nbsp;·&nbsp; Maroon = current stage
+      </div>
       <div class="rx-workflow-steps">${stepsHtml}</div>
     </div>`;
 }
 
-// ══════════════════════════════════════════════
-// WORKFLOW DETAIL LIST (notes column)
-// ══════════════════════════════════════════════
-function buildWorkflowDetail(checkedIds) {
-  if(!checkedIds.length) return '';
-  const checkedSet=new Set(checkedIds);
-  const stages=WORKFLOW_STAGES.filter(s=>checkedSet.has(s.id));
-  const lastId=checkedIds[checkedIds.length-1];
-  return `
-    <div class="rx-section-heading">Enclosed / Completed Workflow Stages</div>
-    <div class="rx-workflow-tags">
-      ${stages.map(s=>`
-        <div class="rx-wf-tag">
-          <span class="tag-num">${s.step}</span>
-          <span class="tag-who ${s.who}">${s.who}</span>
-          <span>${s.label}${s.id===lastId?' <em style="color:var(--maroon)">(current)</em>':''}</span>
-        </div>`).join('')}
-    </div>`;
-}
+// buildWorkflowDetail removed — workflow is fully represented in the strip above.
 
 // ══════════════════════════════════════════════
 // RENDER PRESCRIPTION
@@ -471,7 +462,6 @@ function renderPrescription(data) {
     <div class="rx-body">
       <div class="rx-notes-col">
         ${data.workHtml}
-        ${buildWorkflowDetail(data.workflow||[])}
         ${clinicalNotesHtml}
       </div>
       <div class="rx-arch-col">
@@ -783,8 +773,7 @@ clearBtn.addEventListener('click',()=>{
   state.lastData=null;
 });
 
-printBtn.addEventListener('click',()=>window.print());
-saveBtn.addEventListener('click',()=>{ if(state.lastData){ saveToHistory(state.lastData); alert('Saved: '+state.lastData.caseRef); }});
+pdfBtn.addEventListener('click',()=>window.print());
 clearTeethBtn.addEventListener('click',()=>{ state.toothStates={}; buildControlChart(); });
 
 // ══════════════════════════════════════════════
