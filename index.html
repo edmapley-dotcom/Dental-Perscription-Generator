@@ -1,367 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dental Lab Prescription — Practice Tool</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Playfair+Display:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cardiff Met — Dental Lab Prescription</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <header class="site-header">
-    <div class="header-inner">
-      <div class="logo">
-        <svg class="logo-tooth" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2C5 2 2 5 2 9c0 3 1 5 2 7 1 3 1 6 2 10 .5 2.5 1.5 6 3 6s2-3 3-6c.5-2 1-3 2-3s1.5 1 2 3c1 3 1.5 6 3 6s2.5-3.5 3-6c1-4 1-7 2-10 1-2 2-4 2-7 0-4-3-7-6-7-2 0-3.5 1-5 1S10 2 8 2z" fill="rgba(255,255,255,0.9)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
-        </svg>
-        <div>
-          <span class="logo-title">Dental Lab Rx</span>
-          <span class="logo-sub">Laboratory Prescription Practice Tool</span>
-        </div>
-      </div>
-      <nav class="header-nav">
-        <button class="nav-btn active" data-tab="generate">New Prescription</button>
-        <button class="nav-btn" data-tab="history">Saved</button>
-      </nav>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <!-- Logo is injected by JS as base64 so it works on Vercel without extra files -->
+      <img id="headerLogo" class="header-logo-img" alt="Cardiff Metropolitan University"/>
     </div>
-  </header>
+    <div class="header-centre">
+      <span class="header-app-name">Dental Technology</span>
+      <span class="header-app-sub">Laboratory Prescription Practice Tool</span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" data-tab="generate">New Prescription</button>
+      <button class="nav-btn" data-tab="history">Saved</button>
+    </nav>
+  </div>
+</header>
 
-  <main class="main-layout">
+<main class="main-layout">
 
-    <!-- ═══ LEFT: Control Panel ═══ -->
-    <aside class="panel panel-controls" id="tab-generate">
+  <!-- ═══ LEFT: Controls ═══ -->
+  <aside class="panel panel-controls" id="tab-generate">
 
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Prescription Type</div>
-        <div class="type-tabs" id="typeTabs">
-          <button class="type-tab active" data-type="fixed">Fixed Prosthodontics</button>
-          <button class="type-tab" data-type="removable">Removable Prosthodontics</button>
-          <button class="type-tab" data-type="ortho">Orthodontics</button>
-        </div>
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Prescription Type</div>
+      <div class="type-tabs" id="typeTabs">
+        <button class="type-tab active" data-type="fixed">Fixed Prosthodontics</button>
+        <button class="type-tab" data-type="removable">Removable Prosthodontics</button>
+        <button class="type-tab" data-type="ortho">Orthodontics</button>
       </div>
+    </div>
 
-      <div class="ctrl-section">
-        <button class="btn btn-rand" id="randomBtn">⟳ &nbsp;Randomise Scenario</button>
+    <div class="ctrl-section">
+      <button class="btn btn-rand" id="randomBtn">⟳ &nbsp;Randomise Scenario</button>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Patient</div>
+      <div class="ctrl-row">
+        <label>Name</label>
+        <input type="text" id="patientName" placeholder="Auto-filled on randomise"/>
       </div>
+      <div class="ctrl-row two-col">
+        <div><label>Date of Birth</label><input type="date" id="patientDOB"/></div>
+        <div><label>Patient ID</label><input type="text" id="patientID" placeholder="PT-XXXXX"/></div>
+      </div>
+    </div>
 
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Prescribing Clinician</div>
+      <div class="ctrl-row">
+        <label>Name</label>
+        <input type="text" id="clinicianName" placeholder="Dr. Full Name"/>
+      </div>
+      <div class="ctrl-row two-col">
+        <div><label>Clinic / Practice</label><input type="text" id="practice" placeholder="Randomised"/></div>
+        <div><label>Prescription Date</label><input type="date" id="rxDate"/></div>
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Case</div>
+      <div class="ctrl-row two-col">
+        <div><label>Due Date</label><input type="date" id="dueDate"/></div>
+        <div><label>Case Reference</label><input type="text" id="caseRef" placeholder="Auto-generated"/></div>
+      </div>
+    </div>
+
+    <!-- FIXED fields -->
+    <div class="work-fields" id="fields-fixed">
       <div class="ctrl-section">
-        <div class="ctrl-section-title">Patient</div>
+        <div class="ctrl-section-title">Fixed Work Specification</div>
         <div class="ctrl-row">
-          <label>Name</label>
-          <input type="text" id="patientName" placeholder="Auto-filled on randomise" />
+          <label>Restoration Type</label>
+          <select id="fixedType">
+            <option value="">— Select —</option>
+            <option>Full coverage crown</option>
+            <option>Three-quarter crown</option>
+            <option>Onlay</option><option>Inlay</option><option>Veneer</option>
+            <option>Fixed-fixed bridge</option>
+            <option>Fixed-moveable bridge</option>
+            <option>Cantilever bridge</option>
+            <option>Maryland bridge</option>
+            <option>Implant crown</option>
+            <option>Implant-supported bridge</option>
+            <option>Temporary crown / bridge</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <label>Material</label>
+          <select id="fixedMaterial">
+            <option value="">— Select —</option>
+            <optgroup label="Ceramic">
+              <option>Full zirconia</option>
+              <option>Layered zirconia (zirconia + porcelain)</option>
+              <option>Lithium disilicate (e.max)</option>
+              <option>Feldspathic porcelain</option>
+              <option>Leucite-reinforced ceramic</option>
+            </optgroup>
+            <optgroup label="Metal-Ceramic">
+              <option>Porcelain fused to metal (PFM) — precious alloy</option>
+              <option>Porcelain fused to metal (PFM) — base metal</option>
+            </optgroup>
+            <optgroup label="Metal">
+              <option>Full cast gold alloy</option>
+              <option>Full cast base metal alloy</option>
+            </optgroup>
+            <optgroup label="Resin">
+              <option>CAD/CAM composite resin</option>
+              <option>PMMA temporary</option>
+            </optgroup>
+          </select>
         </div>
         <div class="ctrl-row two-col">
           <div>
-            <label>DOB</label>
-            <input type="date" id="patientDOB" />
-          </div>
-          <div>
-            <label>Patient ID</label>
-            <input type="text" id="patientID" placeholder="PT-XXXXX" />
-          </div>
-        </div>
-      </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Prescribing Clinician</div>
-        <div class="ctrl-row">
-          <label>Name</label>
-          <input type="text" id="clinicianName" placeholder="Dr. Full Name" />
-        </div>
-        <div class="ctrl-row two-col">
-          <div>
-            <label>GDC Number</label>
-            <input type="text" id="gdcNumber" placeholder="GDC-XXXXXX" />
-          </div>
-          <div>
-            <label>Date</label>
-            <input type="date" id="rxDate" />
-          </div>
-        </div>
-        <div class="ctrl-row">
-          <label>Practice / University</label>
-          <input type="text" id="practice" placeholder="Institution name" />
-        </div>
-      </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Laboratory</div>
-        <div class="ctrl-row">
-          <label>Lab Name</label>
-          <input type="text" id="labName" placeholder="Dental laboratory name" />
-        </div>
-        <div class="ctrl-row two-col">
-          <div>
-            <label>Due Date</label>
-            <input type="date" id="dueDate" />
-          </div>
-          <div>
-            <label>Case Reference</label>
-            <input type="text" id="caseRef" placeholder="Auto-generated" />
-          </div>
-        </div>
-      </div>
-
-      <!-- FIXED PROSTHODONTICS fields -->
-      <div class="work-fields" id="fields-fixed">
-        <div class="ctrl-section">
-          <div class="ctrl-section-title">Fixed Work</div>
-          <div class="ctrl-row">
-            <label>Restoration Type</label>
-            <select id="fixedType">
-              <option value="">— Select —</option>
-              <option>Full coverage crown</option>
-              <option>Three-quarter crown</option>
-              <option>Onlay</option>
-              <option>Inlay</option>
-              <option>Veneer</option>
-              <option>Fixed-fixed bridge</option>
-              <option>Fixed-moveable bridge</option>
-              <option>Cantilever bridge</option>
-              <option>Maryland bridge</option>
-              <option>Implant crown</option>
-              <option>Implant-supported bridge</option>
-              <option>Temporary crown / bridge</option>
+            <label>Shade (Body)</label>
+            <select id="shadeBody">
+              <option value="">—</option>
+              <optgroup label="Vita Classical">
+                <option>A1</option><option>A2</option><option>A3</option>
+                <option>A3.5</option><option>A4</option>
+                <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
+                <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
+                <option>D2</option><option>D3</option><option>D4</option>
+              </optgroup>
+              <optgroup label="Vita 3D-Master">
+                <option>1M1</option><option>1M2</option>
+                <option>2L1.5</option><option>2M1</option><option>2M2</option><option>2M3</option><option>2R2.5</option>
+                <option>3L1.5</option><option>3M1</option><option>3M2</option><option>3M3</option><option>3R2.5</option>
+                <option>4L1.5</option><option>4M1</option><option>4M2</option><option>4M3</option>
+                <option>5M1</option><option>5M2</option><option>5M3</option>
+              </optgroup>
             </select>
           </div>
-          <div class="ctrl-row">
-            <label>Material</label>
-            <select id="fixedMaterial">
-              <option value="">— Select —</option>
-              <optgroup label="Ceramic">
-                <option>Full zirconia</option>
-                <option>Layered zirconia (zirconia + porcelain)</option>
-                <option>Lithium disilicate (e.max)</option>
-                <option>Feldspathic porcelain</option>
-                <option>Leucite-reinforced ceramic</option>
-              </optgroup>
-              <optgroup label="Metal-Ceramic">
-                <option>Porcelain fused to metal (PFM) — precious alloy</option>
-                <option>Porcelain fused to metal (PFM) — base metal</option>
-              </optgroup>
-              <optgroup label="Metal">
-                <option>Full cast gold alloy</option>
-                <option>Full cast base metal alloy</option>
-              </optgroup>
-              <optgroup label="Composite / Resin">
-                <option>Composite resin (direct)</option>
-                <option>CAD/CAM composite resin</option>
-                <option>PMMA temporary</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="ctrl-row two-col">
-            <div>
-              <label>Shade (Body)</label>
-              <select id="shadeBody">
-                <option value="">—</option>
-                <optgroup label="Vita Classical">
-                  <option>A1</option><option>A2</option><option>A3</option>
-                  <option>A3.5</option><option>A4</option>
-                  <option>B1</option><option>B2</option><option>B3</option><option>B4</option>
-                  <option>C1</option><option>C2</option><option>C3</option><option>C4</option>
-                  <option>D2</option><option>D3</option><option>D4</option>
-                </optgroup>
-                <optgroup label="Vita 3D-Master">
-                  <option>0M1</option><option>0M2</option><option>0M3</option>
-                  <option>1M1</option><option>1M2</option>
-                  <option>2L1.5</option><option>2L2.5</option>
-                  <option>2M1</option><option>2M2</option><option>2M3</option>
-                  <option>2R1.5</option><option>2R2.5</option>
-                  <option>3L1.5</option><option>3L2.5</option>
-                  <option>3M1</option><option>3M2</option><option>3M3</option>
-                  <option>3R1.5</option><option>3R2.5</option>
-                  <option>4L1.5</option><option>4L2.5</option>
-                  <option>4M1</option><option>4M2</option><option>4M3</option>
-                  <option>4R1.5</option><option>4R2.5</option>
-                  <option>5M1</option><option>5M2</option><option>5M3</option>
-                </optgroup>
-              </select>
-            </div>
-            <div>
-              <label>Shade (Gingival)</label>
-              <input type="text" id="shadeGingival" placeholder="e.g. A3" />
-            </div>
-          </div>
-          <div class="ctrl-row">
+          <div><label>Shade (Gingival)</label><input type="text" id="shadeGingival" placeholder="e.g. A3"/></div>
+        </div>
+        <div class="ctrl-row two-col">
+          <div>
             <label>Occlusal Scheme</label>
             <select id="occlusalScheme">
               <option value="">— Select —</option>
-              <option>Conformative (copy existing occlusion)</option>
+              <option>Conformative (copy existing)</option>
               <option>Reorganised — RCP</option>
               <option>Group function</option>
               <option>Mutually protected / canine guidance</option>
               <option>Lingualized occlusion</option>
             </select>
           </div>
-          <div class="ctrl-row two-col">
-            <div>
-              <label>Margin Type</label>
-              <select id="marginType">
-                <option value="">—</option>
-                <option>Shoulder</option>
-                <option>Chamfer</option>
-                <option>Knife-edge</option>
-                <option>Feather edge</option>
-                <option>Deep chamfer</option>
-              </select>
-            </div>
-            <div>
-              <label>Pontic Design</label>
-              <select id="ponticDesign">
-                <option value="">— N/A —</option>
-                <option>Ovate</option>
-                <option>Ridge lap</option>
-                <option>Modified ridge lap</option>
-                <option>Sanitary / hygienic</option>
-                <option>Bullet / conical</option>
-              </select>
-            </div>
+          <div>
+            <label>Margin Type</label>
+            <select id="marginType">
+              <option value="">—</option>
+              <option>Shoulder</option><option>Chamfer</option>
+              <option>Knife-edge</option><option>Feather edge</option><option>Deep chamfer</option>
+            </select>
           </div>
         </div>
-      </div>
-
-      <!-- REMOVABLE PROSTHODONTICS fields -->
-      <div class="work-fields" id="fields-removable" style="display:none;">
-        <div class="ctrl-section">
-          <div class="ctrl-section-title">Removable Work</div>
-          <div class="ctrl-row">
-            <label>Appliance Type</label>
-            <select id="removableType">
-              <option value="">— Select —</option>
-              <optgroup label="Partial Dentures">
-                <option>Acrylic partial denture</option>
-                <option>Chrome cobalt partial denture</option>
-                <option>Flexible partial denture (Valplast)</option>
-                <option>Immediate partial denture</option>
-              </optgroup>
-              <optgroup label="Complete Dentures">
-                <option>Complete upper denture</option>
-                <option>Complete lower denture</option>
-                <option>Complete upper and lower dentures</option>
-                <option>Immediate complete denture</option>
-                <option>Copy denture</option>
-                <option>Implant-retained overdenture</option>
-              </optgroup>
-              <optgroup label="Special Trays / Bases">
-                <option>Special tray — upper</option>
-                <option>Special tray — lower</option>
-                <option>Record base and wax rim</option>
-                <option>Spoon denture</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="ctrl-row two-col">
-            <div>
-              <label>Tooth Shade</label>
-              <select id="removableShade">
-                <option value="">—</option>
-                <option>A1</option><option>A2</option><option>A3</option>
-                <option>A3.5</option><option>A4</option>
-                <option>B1</option><option>B2</option><option>B3</option>
-                <option>C1</option><option>C2</option><option>D2</option>
-              </select>
-            </div>
-            <div>
-              <label>Tooth Mould</label>
-              <input type="text" id="toothMould" placeholder="e.g. SR Phonares II 6" />
-            </div>
-          </div>
-          <div class="ctrl-row two-col">
-            <div>
-              <label>Gum Shade</label>
-              <select id="gumShade">
-                <option value="">—</option>
-                <option>Light pink</option>
-                <option>Medium pink</option>
-                <option>Dark pink</option>
-                <option>Stippled</option>
-                <option>As natural</option>
-              </select>
-            </div>
-            <div>
-              <label>Clasps / Retention</label>
-              <select id="claspType">
-                <option value="">— N/A —</option>
-                <option>Adams clasp</option>
-                <option>Ball clasp</option>
-                <option>Circumferential (Akers) clasp</option>
-                <option>RPI clasp</option>
-                <option>Wrought wire clasp</option>
-                <option>Bar / I-bar clasp</option>
-                <option>Precision attachment</option>
-                <option>Swing-lock</option>
-              </select>
-            </div>
-          </div>
-          <div class="ctrl-row">
-            <label>Occlusal Scheme</label>
-            <select id="removableOcclusion">
-              <option value="">— Select —</option>
-              <option>Bilateral balanced occlusion</option>
-              <option>Lingualized occlusion</option>
-              <option>Monoplane (flat plane)</option>
-              <option>Copy existing occlusion</option>
-            </select>
-          </div>
-          <div class="ctrl-row">
-            <label>Special Instructions</label>
-            <textarea id="removableNotes" rows="2" placeholder="e.g. Cobalt chrome major connector — palatal plate design. Mesh for acrylic bond on 14, 24."></textarea>
-          </div>
+        <div class="ctrl-row">
+          <label>Pontic Design</label>
+          <select id="ponticDesign">
+            <option value="">— N/A —</option>
+            <option>Ovate</option><option>Ridge lap</option>
+            <option>Modified ridge lap</option><option>Sanitary / hygienic</option><option>Bullet / conical</option>
+          </select>
         </div>
       </div>
+    </div>
 
-      <!-- ORTHODONTICS fields -->
-      <div class="work-fields" id="fields-ortho" style="display:none;">
-        <div class="ctrl-section">
-          <div class="ctrl-section-title">Orthodontic Appliance</div>
-          <div class="ctrl-row">
-            <label>Appliance Type</label>
-            <select id="orthoType">
-              <option value="">— Select —</option>
-              <optgroup label="Removable">
-                <option>Upper removable appliance (URA)</option>
-                <option>Lower removable appliance (LRA)</option>
-                <option>Hawley retainer — upper</option>
-                <option>Hawley retainer — lower</option>
-                <option>Begg retainer</option>
-                <option>Vacuum-formed retainer (VFR) — upper</option>
-                <option>Vacuum-formed retainer (VFR) — lower</option>
-                <option>Twin block appliance</option>
-                <option>Frankel appliance</option>
-                <option>Herbst appliance</option>
-              </optgroup>
-              <optgroup label="Fixed">
-                <option>Fixed retainer — upper (bonded wire)</option>
-                <option>Fixed retainer — lower (bonded wire)</option>
-                <option>Transpalatal arch (TPA)</option>
-                <option>Nance appliance</option>
-                <option>Quad helix</option>
-                <option>Expansion arch / schwarz plate</option>
-                <option>Space maintainer</option>
-              </optgroup>
-              <optgroup label="Functional">
-                <option>Bionator</option>
-                <option>Medium opening activator (MOA)</option>
-                <option>Reverse pull headgear / facemask</option>
-              </optgroup>
+    <!-- REMOVABLE fields -->
+    <div class="work-fields" id="fields-removable" style="display:none">
+      <div class="ctrl-section">
+        <div class="ctrl-section-title">Removable Work Specification</div>
+        <div class="ctrl-row">
+          <label>Appliance Type</label>
+          <select id="removableType">
+            <option value="">— Select —</option>
+            <optgroup label="Partial Dentures">
+              <option>Acrylic partial denture</option>
+              <option>Chrome cobalt partial denture</option>
+              <option>Flexible partial denture (Valplast)</option>
+              <option>Immediate partial denture</option>
+            </optgroup>
+            <optgroup label="Complete Dentures">
+              <option>Complete upper denture</option>
+              <option>Complete lower denture</option>
+              <option>Complete upper and lower dentures</option>
+              <option>Immediate complete denture</option>
+              <option>Copy denture</option>
+              <option>Implant-retained overdenture</option>
+            </optgroup>
+            <optgroup label="Special Trays / Bases">
+              <option>Special tray — upper</option>
+              <option>Special tray — lower</option>
+              <option>Record base and wax rim</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="ctrl-row two-col">
+          <div>
+            <label>Tooth Shade</label>
+            <select id="removableShade">
+              <option value="">—</option>
+              <option>A1</option><option>A2</option><option>A3</option>
+              <option>A3.5</option><option>A4</option>
+              <option>B1</option><option>B2</option><option>B3</option>
+              <option>C1</option><option>C2</option><option>D2</option>
             </select>
           </div>
-          <div class="ctrl-row two-col">
-            <div>
-              <label>Wire Gauge / Type</label>
-              <input type="text" id="wireGauge" placeholder="e.g. 0.7mm stainless" />
-            </div>
-            <div>
-              <label>Spring / Component</label>
-              <input type="text" id="springDetail" placeholder="e.g. Z-spring on 12" />
-            </div>
+          <div><label>Tooth Mould</label><input type="text" id="toothMould" placeholder="e.g. SR Phonares II 6"/></div>
+        </div>
+        <div class="ctrl-row two-col">
+          <div>
+            <label>Gum Shade</label>
+            <select id="gumShade">
+              <option value="">—</option>
+              <option>Light pink</option><option>Medium pink</option>
+              <option>Dark pink</option><option>Stippled</option><option>As natural</option>
+            </select>
           </div>
-          <div class="ctrl-row">
-            <label>Screw</label>
+          <div>
+            <label>Clasps / Retention</label>
+            <select id="claspType">
+              <option value="">— N/A —</option>
+              <option>Adams clasp</option><option>Ball clasp</option>
+              <option>Circumferential (Akers) clasp</option><option>RPI clasp</option>
+              <option>Wrought wire clasp</option><option>Bar / I-bar clasp</option>
+              <option>Precision attachment</option>
+            </select>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <label>Occlusal Scheme</label>
+          <select id="removableOcclusion">
+            <option value="">— Select —</option>
+            <option>Bilateral balanced occlusion</option>
+            <option>Lingualized occlusion</option>
+            <option>Monoplane (flat plane)</option>
+            <option>Copy existing occlusion</option>
+          </select>
+        </div>
+        <div class="ctrl-row">
+          <label>Design / Special Instructions</label>
+          <textarea id="removableNotes" rows="3" placeholder="e.g. Cobalt chrome — palatal plate major connector. Mesh retention on 14, 24."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORTHO fields -->
+    <div class="work-fields" id="fields-ortho" style="display:none">
+      <div class="ctrl-section">
+        <div class="ctrl-section-title">Orthodontic Appliance Specification</div>
+        <div class="ctrl-row">
+          <label>Appliance Type</label>
+          <select id="orthoType">
+            <option value="">— Select —</option>
+            <optgroup label="Removable">
+              <option>Upper removable appliance (URA)</option>
+              <option>Lower removable appliance (LRA)</option>
+              <option>Hawley retainer — upper</option>
+              <option>Hawley retainer — lower</option>
+              <option>Begg retainer</option>
+              <option>Vacuum-formed retainer (VFR) — upper</option>
+              <option>Vacuum-formed retainer (VFR) — lower</option>
+              <option>Twin block appliance</option>
+              <option>Frankel appliance</option>
+            </optgroup>
+            <optgroup label="Fixed / Semi-fixed">
+              <option>Fixed retainer — upper (bonded wire)</option>
+              <option>Fixed retainer — lower (bonded wire)</option>
+              <option>Transpalatal arch (TPA)</option>
+              <option>Nance appliance</option>
+              <option>Quad helix</option>
+              <option>Expansion arch / schwarz plate</option>
+              <option>Space maintainer</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="ctrl-row two-col">
+          <div><label>Wire Gauge / Type</label><input type="text" id="wireGauge" placeholder="e.g. 0.7mm stainless"/></div>
+          <div><label>Spring / Component</label><input type="text" id="springDetail" placeholder="e.g. Z-spring on 12"/></div>
+        </div>
+        <div class="ctrl-row two-col">
+          <div>
+            <label>Expansion Screw</label>
             <select id="expansionScrew">
               <option value="">— None —</option>
               <option>Midline expansion screw</option>
@@ -371,106 +303,109 @@
               <option>Fan screw</option>
             </select>
           </div>
-          <div class="ctrl-row">
-            <label>Baseplate / Acrylic Colour</label>
+          <div>
+            <label>Acrylic Colour</label>
             <select id="acrylicColour">
               <option value="">— Select —</option>
               <option>Clear / transparent</option>
-              <option>Pink</option>
-              <option>Blue</option>
-              <option>Green</option>
-              <option>Purple</option>
-              <option>Red</option>
+              <option>Pink</option><option>Blue</option><option>Green</option>
+              <option>Purple</option><option>Red</option>
               <option>Glitter (patient choice)</option>
             </select>
           </div>
-          <div class="ctrl-row">
-            <label>Special Instructions</label>
-            <textarea id="orthoNotes" rows="2" placeholder="e.g. Trim baseplate clear of 13, 23 to allow eruption. Adams clasps on 16, 26."></textarea>
-          </div>
+        </div>
+        <div class="ctrl-row">
+          <label>Design / Special Instructions</label>
+          <textarea id="orthoNotes" rows="3" placeholder="e.g. Adams clasps 16, 26. Trim baseplate clear of 13, 23."></textarea>
         </div>
       </div>
+    </div>
 
-      <!-- Common fields: Tooth Chart & Notes -->
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Teeth Involved &mdash; click to select</div>
-        <div class="tooth-chart-control" id="toothChartControl"></div>
-        <div class="tooth-legend">
-          <span class="legend-dot legend-abutment"></span> Abutment / Crown &nbsp;
-          <span class="legend-dot legend-pontic"></span> Pontic &nbsp;
-          <span class="legend-dot legend-missing"></span> Missing
-        </div>
-        <div class="ctrl-row" style="margin-top:8px;">
-          <label>Tooth marking mode</label>
-          <select id="toothMode">
-            <option value="abutment">Abutment / Crown / Bracket</option>
-            <option value="pontic">Pontic</option>
-            <option value="missing">Missing / Extracted</option>
-          </select>
-        </div>
-        <button class="btn btn-ghost" id="clearTeethBtn" style="margin-top:6px;font-size:12px;">Clear tooth selection</button>
+    <!-- Tooth chart -->
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Teeth Involved — click to mark</div>
+      <div class="ctrl-row">
+        <label>Marking mode</label>
+        <select id="toothMode">
+          <option value="abutment">Abutment / Crown / Bracket</option>
+          <option value="pontic">Pontic</option>
+          <option value="missing">Missing / Extracted</option>
+        </select>
       </div>
-
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Additional Notes for Lab</div>
-        <textarea id="labNotes" rows="3" placeholder="e.g. Please include try-in stage. Patient has strong gag reflex — keep flanges short. Photos enclosed."></textarea>
+      <div class="tooth-chart-control" id="toothChartControl"></div>
+      <div class="tooth-legend">
+        <span class="legend-dot legend-abutment"></span> Abutment/Crown &nbsp;
+        <span class="legend-dot legend-pontic"></span> Pontic &nbsp;
+        <span class="legend-dot legend-missing"></span> Missing
       </div>
+      <button class="btn btn-ghost" id="clearTeethBtn">Clear tooth selection</button>
+    </div>
 
-      <div class="ctrl-section">
-        <div class="ctrl-section-title">Enclosures</div>
-        <div class="checkbox-group" id="enclosureGroup">
-          <label class="check-label"><input type="checkbox" value="Impressions (alginate)"> Impressions (alginate)</label>
-          <label class="check-label"><input type="checkbox" value="Impressions (polyvinylsiloxane)"> Impressions (PVS)</label>
-          <label class="check-label"><input type="checkbox" value="Bite registration"> Bite registration</label>
-          <label class="check-label"><input type="checkbox" value="Facebow record"> Facebow record</label>
-          <label class="check-label"><input type="checkbox" value="Photographs"> Photographs</label>
-          <label class="check-label"><input type="checkbox" value="Study models"> Study models</label>
-          <label class="check-label"><input type="checkbox" value="Digital scan (STL)"> Digital scan (STL)</label>
-          <label class="check-label"><input type="checkbox" value="Existing prosthesis"> Existing prosthesis</label>
-          <label class="check-label"><input type="checkbox" value="Shade tab photograph"> Shade tab photograph</label>
-        </div>
+    <!-- Workflow / Enclosures -->
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Manufacturing Workflow — tick completed / enclosed stages</div>
+      <div class="workflow-checks" id="workflowGroup">
+        <label class="wf-label"><input type="checkbox" value="Primary impressions taken (alginate)"> <span class="wf-step">1</span> Primary impressions (alginate)</label>
+        <label class="wf-label"><input type="checkbox" value="Final impressions taken (PVS / polyether)"> <span class="wf-step">2</span> Final impressions (PVS / polyether)</label>
+        <label class="wf-label"><input type="checkbox" value="Special tray enclosed"> <span class="wf-step">2a</span> Special tray enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Bite registration / occlusal record enclosed"> <span class="wf-step">3</span> Bite registration enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Facebow record taken and enclosed"> <span class="wf-step">3a</span> Facebow record enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Study models / diagnostic wax-up enclosed"> <span class="wf-step">4</span> Study models / wax-up enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Digital scan (STL file) sent"> <span class="wf-step">4a</span> Digital scan (STL) sent</label>
+        <label class="wf-label"><input type="checkbox" value="Photographs enclosed (shade / aesthetic ref)"> <span class="wf-step">5</span> Photographs enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Shade tab photograph enclosed"> <span class="wf-step">5a</span> Shade tab photograph enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Existing prosthesis enclosed for reference"> <span class="wf-step">6</span> Existing prosthesis enclosed</label>
+        <label class="wf-label"><input type="checkbox" value="Try-in stage requested before completion"> <span class="wf-step">7</span> Try-in stage requested</label>
+        <label class="wf-label"><input type="checkbox" value="Framework trial requested"> <span class="wf-step">7a</span> Framework trial requested</label>
+        <label class="wf-label"><input type="checkbox" value="Completed appliance for fit appointment"> <span class="wf-step">8</span> Final appliance for fit</label>
       </div>
+    </div>
 
-      <div class="form-actions">
-        <button class="btn btn-secondary" id="clearBtn">Clear</button>
-        <button class="btn btn-primary" id="generateBtn">Generate Prescription →</button>
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">Additional Clinical Notes</div>
+      <textarea id="labNotes" rows="4" placeholder="e.g. Patient has high smile line — aesthetics critical. Please call before processing if any queries."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" id="clearBtn">Clear</button>
+      <button class="btn btn-primary" id="generateBtn">Generate Prescription →</button>
+    </div>
+
+  </aside>
+
+  <!-- ═══ RIGHT: Preview ═══ -->
+  <section class="panel panel-preview">
+    <div class="preview-toolbar">
+      <h2 class="panel-title">Prescription Preview</h2>
+      <div class="preview-actions" id="previewActions" style="display:none">
+        <button class="btn btn-sm" id="printBtn">Print / PDF</button>
+        <button class="btn btn-sm" id="saveBtn">Save</button>
       </div>
+    </div>
 
-    </aside>
-
-    <!-- ═══ RIGHT: Preview ═══ -->
-    <section class="panel panel-preview">
-      <div class="preview-toolbar">
-        <h2 class="panel-title">Lab Prescription Preview</h2>
-        <div class="preview-actions" id="previewActions" style="display:none;">
-          <button class="btn btn-sm" id="printBtn">Print / PDF</button>
-          <button class="btn btn-sm" id="saveBtn">Save</button>
-        </div>
+    <div class="preview-placeholder" id="previewPlaceholder">
+      <div class="placeholder-tooth">
+        <svg viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6C10 6 4 13 4 22c0 7 3 12 5 18 3 8 3 16 5 26 1 6 3 16 8 16s5-8 8-16c2-5 3-8 6-8s4 3 6 8c3 8 4 16 8 16s7-10 8-16c2-10 2-18 5-26 2-6 5-11 5-18 0-9-6-16-14-16-4 0-8 2-12 2S22 6 18 6z" fill="currentColor"/>
+        </svg>
       </div>
+      <p>Select a type, fill in the details, then click <strong>Generate Prescription</strong>.</p>
+      <p class="placeholder-hint">Or hit <strong>⟳ Randomise</strong> to generate a practice scenario instantly.</p>
+    </div>
 
-      <div class="preview-placeholder" id="previewPlaceholder">
-        <div class="placeholder-tooth">
-          <svg viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 4C9 4 4 9 4 16c0 5 2 9 4 13 2 6 2 12 4 20 1 5 3 12 6 12s4-6 6-12c1-4 2-6 4-6s3 2 4 6c2 6 3 12 6 12s5-7 6-12c2-8 2-14 4-20 2-4 4-8 4-13 0-7-5-12-11-12-4 0-7 2-10 2S19 4 15 4z" fill="currentColor"/>
-          </svg>
-        </div>
-        <p>Select a type, fill in the details,<br>then click <strong>Generate Prescription</strong>.</p>
-        <p style="font-size:12px;opacity:0.6;margin-top:4px;">Or hit <strong>Randomise</strong> to generate a practice scenario.</p>
-      </div>
+    <div id="rxOutput" style="display:none"></div>
+  </section>
 
-      <div id="rxOutput" style="display:none;"></div>
-    </section>
+  <!-- ═══ HISTORY ═══ -->
+  <section class="panel panel-history" id="tab-history" style="display:none">
+    <h2 class="panel-title">Saved Prescriptions</h2>
+    <div id="historyList" class="history-list">
+      <p class="empty-state">No prescriptions saved yet.</p>
+    </div>
+  </section>
 
-    <!-- ═══ HISTORY ═══ -->
-    <section class="panel panel-history" id="tab-history" style="display:none;">
-      <h2 class="panel-title">Saved Prescriptions</h2>
-      <div id="historyList" class="history-list">
-        <p class="empty-state">No prescriptions saved yet.</p>
-      </div>
-    </section>
+</main>
 
-  </main>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
