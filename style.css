@@ -175,6 +175,12 @@ select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .rx-wf-step { display:flex; align-items:center; gap:3px; border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:2px 7px 2px 3px; font-size:9.5px; transition:all .15s; }
 .rx-wf-step .wf-num { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%; font-size:8px; font-family:var(--font-mono); font-weight:700; flex-shrink:0; }
 
+/* Workflow step who badge (inside strip) */
+.rx-wf-who { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; border-radius:50%; font-size:7.5px; font-weight:700; flex-shrink:0; font-family:var(--font-mono); }
+.rx-wf-step.wf-pending  .rx-wf-who { background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.4); }
+.rx-wf-step.wf-done     .rx-wf-who { background:rgba(255,255,255,0.3); color:#fff; }
+.rx-wf-step.wf-current  .rx-wf-who { background:rgba(255,255,255,0.25); color:#fff; }
+
 /* Workflow step states */
 .rx-wf-step.wf-pending  { background:rgba(255,255,255,.06); color:rgba(255,255,255,.45); }
 .rx-wf-step.wf-pending .wf-num  { background:rgba(255,255,255,.12); }
