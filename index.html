@@ -14,7 +14,6 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="logo-wrap">
-      <!-- Logo is injected by JS as base64 so it works on Vercel without extra files -->
       <img id="headerLogo" class="header-logo-img" alt="Cardiff Metropolitan University"/>
     </div>
     <div class="header-centre">
@@ -33,6 +32,7 @@
   <!-- ═══ LEFT: Controls ═══ -->
   <aside class="panel panel-controls" id="tab-generate">
 
+    <!-- Prescription type selector -->
     <div class="ctrl-section">
       <div class="ctrl-section-title">Prescription Type</div>
       <div class="type-tabs" id="typeTabs">
@@ -42,10 +42,7 @@
       </div>
     </div>
 
-    <div class="ctrl-section">
-      <button class="btn btn-rand" id="randomBtn">⟳ &nbsp;Randomise Scenario</button>
-    </div>
-
+    <!-- Patient -->
     <div class="ctrl-section">
       <div class="ctrl-section-title">Patient</div>
       <div class="ctrl-row">
@@ -58,6 +55,7 @@
       </div>
     </div>
 
+    <!-- Clinician -->
     <div class="ctrl-section">
       <div class="ctrl-section-title">Prescribing Clinician</div>
       <div class="ctrl-row">
@@ -70,6 +68,7 @@
       </div>
     </div>
 
+    <!-- Case -->
     <div class="ctrl-section">
       <div class="ctrl-section-title">Case</div>
       <div class="ctrl-row two-col">
@@ -78,10 +77,13 @@
       </div>
     </div>
 
-    <!-- FIXED fields -->
+    <!-- ══ FIXED FIELDS ══ -->
     <div class="work-fields" id="fields-fixed">
       <div class="ctrl-section">
-        <div class="ctrl-section-title">Fixed Work Specification</div>
+        <div class="ctrl-section-title-row">
+          <span class="ctrl-section-title">Fixed Work Specification</span>
+          <button class="btn btn-rand-sm" data-randtype="fixed">⟳ Randomise</button>
+        </div>
         <div class="ctrl-row">
           <label>Restoration Type</label>
           <select id="fixedType">
@@ -178,10 +180,13 @@
       </div>
     </div>
 
-    <!-- REMOVABLE fields -->
+    <!-- ══ REMOVABLE FIELDS ══ -->
     <div class="work-fields" id="fields-removable" style="display:none">
       <div class="ctrl-section">
-        <div class="ctrl-section-title">Removable Work Specification</div>
+        <div class="ctrl-section-title-row">
+          <span class="ctrl-section-title">Removable Work Specification</span>
+          <button class="btn btn-rand-sm" data-randtype="removable">⟳ Randomise</button>
+        </div>
         <div class="ctrl-row">
           <label>Appliance Type</label>
           <select id="removableType">
@@ -257,10 +262,13 @@
       </div>
     </div>
 
-    <!-- ORTHO fields -->
+    <!-- ══ ORTHO FIELDS ══ -->
     <div class="work-fields" id="fields-ortho" style="display:none">
       <div class="ctrl-section">
-        <div class="ctrl-section-title">Orthodontic Appliance Specification</div>
+        <div class="ctrl-section-title-row">
+          <span class="ctrl-section-title">Orthodontic Appliance Specification</span>
+          <button class="btn btn-rand-sm" data-randtype="ortho">⟳ Randomise</button>
+        </div>
         <div class="ctrl-row">
           <label>Appliance Type</label>
           <select id="orthoType">
@@ -341,29 +349,19 @@
       <button class="btn btn-ghost" id="clearTeethBtn">Clear tooth selection</button>
     </div>
 
-    <!-- Workflow / Enclosures -->
+    <!-- Workflow -->
     <div class="ctrl-section">
-      <div class="ctrl-section-title">Manufacturing Workflow — tick completed / enclosed stages</div>
+      <div class="ctrl-section-title">Manufacturing Workflow — mark current stage</div>
+      <p class="wf-hint">Tick all stages that have been completed and/or are enclosed with this prescription.</p>
       <div class="workflow-checks" id="workflowGroup">
-        <label class="wf-label"><input type="checkbox" value="Primary impressions taken (alginate)"> <span class="wf-step">1</span> Primary impressions (alginate)</label>
-        <label class="wf-label"><input type="checkbox" value="Final impressions taken (PVS / polyether)"> <span class="wf-step">2</span> Final impressions (PVS / polyether)</label>
-        <label class="wf-label"><input type="checkbox" value="Special tray enclosed"> <span class="wf-step">2a</span> Special tray enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Bite registration / occlusal record enclosed"> <span class="wf-step">3</span> Bite registration enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Facebow record taken and enclosed"> <span class="wf-step">3a</span> Facebow record enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Study models / diagnostic wax-up enclosed"> <span class="wf-step">4</span> Study models / wax-up enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Digital scan (STL file) sent"> <span class="wf-step">4a</span> Digital scan (STL) sent</label>
-        <label class="wf-label"><input type="checkbox" value="Photographs enclosed (shade / aesthetic ref)"> <span class="wf-step">5</span> Photographs enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Shade tab photograph enclosed"> <span class="wf-step">5a</span> Shade tab photograph enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Existing prosthesis enclosed for reference"> <span class="wf-step">6</span> Existing prosthesis enclosed</label>
-        <label class="wf-label"><input type="checkbox" value="Try-in stage requested before completion"> <span class="wf-step">7</span> Try-in stage requested</label>
-        <label class="wf-label"><input type="checkbox" value="Framework trial requested"> <span class="wf-step">7a</span> Framework trial requested</label>
-        <label class="wf-label"><input type="checkbox" value="Completed appliance for fit appointment"> <span class="wf-step">8</span> Final appliance for fit</label>
+        <!-- Stages rendered by JS so they can carry metadata -->
       </div>
     </div>
 
+    <!-- Additional notes -->
     <div class="ctrl-section">
       <div class="ctrl-section-title">Additional Clinical Notes</div>
-      <textarea id="labNotes" rows="4" placeholder="e.g. Patient has high smile line — aesthetics critical. Please call before processing if any queries."></textarea>
+      <textarea id="labNotes" rows="4" placeholder="e.g. Patient has high smile line — aesthetics critical. Please call before processing if queries arise."></textarea>
     </div>
 
     <div class="form-actions">
@@ -382,7 +380,6 @@
         <button class="btn btn-sm" id="saveBtn">Save</button>
       </div>
     </div>
-
     <div class="preview-placeholder" id="previewPlaceholder">
       <div class="placeholder-tooth">
         <svg viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -390,9 +387,8 @@
         </svg>
       </div>
       <p>Select a type, fill in the details, then click <strong>Generate Prescription</strong>.</p>
-      <p class="placeholder-hint">Or hit <strong>⟳ Randomise</strong> to generate a practice scenario instantly.</p>
+      <p class="placeholder-hint">Or use a <strong>⟳ Randomise</strong> button to generate a scenario instantly.</p>
     </div>
-
     <div id="rxOutput" style="display:none"></div>
   </section>
 
